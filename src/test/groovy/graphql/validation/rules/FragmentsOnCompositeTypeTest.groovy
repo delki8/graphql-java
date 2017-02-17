@@ -69,7 +69,37 @@ class FragmentsOnCompositeTypeTest extends Specification {
 
         then:
         errorCollector.containsValidationError(ValidationErrorType.InlineFragmentTypeConditionInvalid)
+        errorCollector.errors.size() == 1
+        errorCollector.errors[0].message == "Validation error of type InlineFragmentTypeConditionInvalid: Fragment type condition is invalid, must be on Object/Interface/Union"
     }
 
+    def "should results in no error when checking for fragment definition"(FragmentDefinition fragmentDefinition) {
+        given:
+        validationContext.getSchema() >> StarWarsSchema.starWarsSchema
+
+        when:
+        fragmentsOnCompositeType.checkFragmentDefinition(fragmentDefinition)
+
+        then:
+        errorCollector.errors.isEmpty()
+
+        where:
+        fragmentDefinition << [
+                getFragmentDefinitionWithConditionWithStrangeType(),
+                getFragmentDefinitionWithConditionWithRightType()
+        ]
+    }
+
+    private FragmentDefinition getFragmentDefinitionWithConditionWithStrangeType() {
+        def fDefinition = new FragmentDefinition()
+        fDefinition.setTypeCondition(new TypeName("StrangeType"))
+        fDefinition
+    }
+
+    private FragmentDefinition getFragmentDefinitionWithConditionWithRightType() {
+        def fDefinition = new FragmentDefinition()
+        fDefinition.setTypeCondition(new TypeName("Character"))
+        fDefinition
+    }
 
 }
