@@ -30,6 +30,8 @@ class KnownArgumentNamesTest extends Specification {
         knownArgumentNames.checkArgument(argument)
         then:
         errorCollector.containsValidationError(ValidationErrorType.UnknownArgument)
+        errorCollector.errors.size() == 1
+        errorCollector.errors[0].message == "Validation error of type UnknownArgument: Unknown field argument unknownArg"
     }
 
     def "known field argument"() {
@@ -56,6 +58,8 @@ class KnownArgumentNamesTest extends Specification {
         knownArgumentNames.checkArgument(argument)
         then:
         errorCollector.containsValidationError(ValidationErrorType.UnknownDirective)
+        errorCollector.errors.size() == 1
+        errorCollector.errors[0].message == "Validation error of type UnknownDirective: Unknown directive argument unknownArg"
     }
 
     def "known directive argument"() {
@@ -86,4 +90,18 @@ class KnownArgumentNamesTest extends Specification {
         then:
         errorCollector.containsValidationError(ValidationErrorType.UnknownDirective)
     }
+
+    def "no error is added when directive and fieldDef from validation context are null"() {
+        given:
+        validationContext.directive >> null
+        validationContext.fieldDef >> null
+        Argument arg = new Argument("unknownArg", new BooleanValue(false))
+
+        when:
+        knownArgumentNames.checkArgument(arg)
+
+        then:
+        errorCollector.errors.isEmpty()
+    }
 }
+
